@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import SingleCard from './components/singleCard';
 import './App.css';
 
 const cardImages = [
-  { "src": "/img/idi-amin.jpg" },
-  { "src": "/img/kim_jong_il_portrait-2.jpg" },
-  { "src": "/img/peron.jpg" },
-  { "src": "/img/qaddafi.jpg"  },
-  { "src": "/img/stalin.jpg" },
-  { "src": "/img/trujillo.jpg"  }
+  { "src": "/img/idi-amin.jpg", matched: false },
+  { "src": "/img/kim_jong_il_portrait-2.jpg", matched: false },
+  { "src": "/img/peron.jpg", matched: false },
+  { "src": "/img/qaddafi.jpg", matched: false  },
+  { "src": "/img/stalin.jpg", matched: false },
+  { "src": "/img/trujillo.jpg", matched: false  }
 ]
 
 
@@ -16,6 +16,9 @@ const cardImages = [
 function App() {
   const [cards, setCards] = useState([])
   const [turns, setTurns] = useState(0)
+  const [cardChoiceOne, setCardChoiceOne] = useState(null)
+  const [cardChoiceTwo, setCardChoiceTwo] = useState(null)
+
   const shuffleCards = () => {
     const shuffledCards = [...cardImages, ...cardImages]
       .sort(() => Math.random() - 0.5)
@@ -25,7 +28,40 @@ function App() {
     setTurns(0)
   }
 
-console.log(cards, turns)
+//handle a choice
+const handleChoice = (card) => {
+  cardChoiceOne ? setCardChoiceTwo(card) : setCardChoiceOne(card)
+}
+
+//compare 2 selected cards
+useEffect(() => {
+  if (cardChoiceOne && cardChoiceTwo) {
+    if (cardChoiceOne.src === cardChoiceTwo.src) {
+      setCards(prevCards => {
+        return prevCards.map(card => {
+          if (card.src === cardChoiceOne.src) {
+            return {...card, matched: true}
+          } else {
+            return card
+          }
+        })
+      })
+      resetTurn()
+    } else {
+      
+      resetTurn()
+    }
+  }
+}, [cardChoiceOne, cardChoiceTwo])
+
+console.log(cards)
+
+//reset choices & increase turn
+const resetTurn = () => {
+  setCardChoiceOne(null)
+  setCardChoiceTwo(null)
+  setTurns(prevTurns => prevTurns +1)
+}
 
   return (
     <div className="App">
@@ -34,7 +70,10 @@ console.log(cards, turns)
       
       <div className="card-grid">
         {cards.map(card => (
-          <SingleCard key={card.id} card={card} />
+          <SingleCard 
+            key={card.id} 
+            card={card}
+            handleChoice= {handleChoice} />
         ))}
     </div>
     </div>
